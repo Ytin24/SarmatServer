@@ -21,18 +21,17 @@ namespace SarmatServer.Controllers
             _context = context;
         }
 
-        // GET: api/Users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Users>>> GetUser()
         {
             return await _context.Users.ToListAsync();
         }
 
-        // GET: api/Users/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Users>> GetUser(int id)
+        [HttpGet("{Login}")]
+        public async Task<ActionResult<Users>> GetUser(string Login)
         {
-            var user = await _context.Users.FindAsync(id);
+            
+            var user = _context.Users.Where(u=>u.Login == Login).AsEnumerable().First(t => t.Login == Login); ;
 
             if (user == null)
             {
@@ -65,6 +64,26 @@ namespace SarmatServer.Controllers
             var users = await _context.Users.ToListAsync();
 
             return users.Where(x => x.Online == Online).Count();
+        }
+        [HttpPost("AddNewUser")]
+        public async Task<IActionResult> AddUser([FromBody]Users User)
+        {
+            if (User != null)
+            {
+                try
+                {
+                    _context.Users.Add(User);
+                    _context.SaveChanges();
+                    return Ok();
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest();
+                }
+               
+            }
+
+            return BadRequest();
         }
     }
 }
